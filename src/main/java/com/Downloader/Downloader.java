@@ -1,4 +1,4 @@
-package Downloader;
+package com.Downloader;
 
 
 import java.io.*;
@@ -58,9 +58,10 @@ public class Downloader extends File_default implements IDownloader {
         if (nameFile == null || nameFile.isEmpty()) {
             nameFile = url.getFile();
         }
+        nameFile = getNameFile(nameFile) + getFormat(nameFile);
 
         {                                                                   // create File for download
-            String fileSave = pathTo + File.separator + nameFile;
+            String fileSave = pathTo + File.separatorChar + nameFile;
             if (replaceInExisting) {
                 setFile(new File(fileSave));
                 if (getFile().exists() && getFile().isDirectory()) {
@@ -69,6 +70,7 @@ public class Downloader extends File_default implements IDownloader {
             } else {
                 setFile(notCopeName(fileSave));
             }
+
         }
 
         try {
@@ -76,6 +78,11 @@ public class Downloader extends File_default implements IDownloader {
             urlConnection.addRequestProperty(getUSER_AGENT(), getPROPERTY());
 
             BufferedInputStream in = new BufferedInputStream(urlConnection.getInputStream());
+
+            if (!getFile().exists()) {
+                newFile(getFile());
+            }
+
             FileOutputStream fileOutputStream = new FileOutputStream(
 
                     getFile()
@@ -87,9 +94,6 @@ public class Downloader extends File_default implements IDownloader {
                 fileOutputStream.write(dataBuffer, 0, bytesRead);
             }
 
-        } catch (FileNotFoundException fileNotFoundException) {      // not correct name format for file download
-
-            download(url, pathTo, (getDEFAULT_NAME_FILE() + getFormat(nameFile)), replaceInExisting);
         } catch (IOException e) {
             e.printStackTrace();
             return false;
@@ -108,7 +112,7 @@ public class Downloader extends File_default implements IDownloader {
     }
 
     public String getDEFAULT_NAME_FILE() {
-        final String DEFAULT_NAME_FILE = "download file";
+        final String DEFAULT_NAME_FILE = "file";
         return DEFAULT_NAME_FILE;
     }
 
@@ -124,13 +128,25 @@ public class Downloader extends File_default implements IDownloader {
      */
     public String getFormat(String file) {
         int separator;
-        if (file == null || (separator = file.lastIndexOf(IFile.SEPARATOR_FORMAT_FILE)) < 0) {
+        if (file == null || (separator = file.lastIndexOf(SEPARATOR_FORMAT_FILE)) < 0) {
             return "";
         }
 
         String format = file.substring(separator);
 
         return (format.length() > 1) ? (format.matches("[.]\\w+") ? format : "") : "";
+    }
+
+
+    public String getNameFile(String name) {
+
+        if (name == null || name.isEmpty()) {
+            return getDEFAULT_NAME_FILE();
+        }
+        int last = name.lastIndexOf(SEPARATOR_FORMAT_FILE);
+        name = name.substring(0, (last < 1) ? name.length() - 1 : last);
+
+        return (name.matches("[^|\\\\/?*:<>\"]+") ? name : getDEFAULT_NAME_FILE());
     }
 
 

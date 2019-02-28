@@ -1,4 +1,4 @@
-package Downloader;
+package com.Downloader;
 
 import java.net.URL;
 

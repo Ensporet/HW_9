@@ -1,4 +1,4 @@
-import Downloader.Downloader;
+import com.Downloader.Downloader;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -16,13 +16,14 @@ public class Main {
 
     public static void main(String[] args) {
 
+        Downloader downloader = new Downloader();
         try {
-            if (new Downloader().download(
+            if (downloader.download(
                     new URL(url),
                     catalogForSave,
                     false
             )) {
-                System.out.println("Download completed");
+                System.out.println("Download completed. File save : " + downloader.getFile());
             } else {
                 System.out.println("Failed to upload file");
             }
