@@ -6,7 +6,7 @@ import java.net.URL;
 import java.net.URLConnection;
 
 
-public class Downloader extends File_default implements IDownloader {
+public class Downloader extends FileDefault implements IDownloader {
 
     private final String USER_AGENT; //  the keyword by which the request is known. Need for Adds a general request
     private final String PROPERTY;  // the value associated with it. Need for Adds a general request
@@ -60,38 +60,25 @@ public class Downloader extends File_default implements IDownloader {
         }
         nameFile = getNameFile(nameFile) + getFormat(nameFile);
 
-        {                                                                   // create File for download
-            String fileSave = pathTo + File.separatorChar + nameFile;
-            if (replaceInExisting) {
-                setFile(new File(fileSave));
-                if (getFile().exists() && getFile().isDirectory()) {
-                    setFile(notCopeName(getFile().getAbsolutePath()));
-                }
-            } else {
-                setFile(notCopeName(fileSave));
-            }
-
-        }
+        createPathForDownload(pathTo, nameFile, replaceInExisting);
 
         try {
-            URLConnection urlConnection = url.openConnection();                     // create connection
-            urlConnection.addRequestProperty(getUSER_AGENT(), getPROPERTY());
+            final URLConnection URL_CONNECTION = url.openConnection();                     // create connection
+            URL_CONNECTION.addRequestProperty(getUserAgent(), getProperty());
 
-            BufferedInputStream in = new BufferedInputStream(urlConnection.getInputStream());
+            final BufferedInputStream BUFFER_INPUT_STREAM = new BufferedInputStream(URL_CONNECTION.getInputStream());
 
             if (!getFile().exists()) {
                 newFile(getFile());
             }
 
-            FileOutputStream fileOutputStream = new FileOutputStream(
-
+            final FileOutputStream OUTPUT_STREAM = new FileOutputStream(
                     getFile()
-
             );
-            byte[] dataBuffer = new byte[1024];
+            final byte[] DATA_BUFFER = new byte[1024];
             int bytesRead;
-            while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {             // reading and writhing
-                fileOutputStream.write(dataBuffer, 0, bytesRead);
+            while ((bytesRead = BUFFER_INPUT_STREAM.read(DATA_BUFFER, 0, 1024)) != -1) {             // reading and writhing
+                OUTPUT_STREAM.write(DATA_BUFFER, 0, bytesRead);
             }
 
         } catch (IOException e) {
@@ -101,19 +88,34 @@ public class Downloader extends File_default implements IDownloader {
         return true;
     }
 
+
+    private void createPathForDownload(String pathTo, String nameFile, boolean replaceInExisting) {
+
+        String fileSave = pathTo + File.separatorChar + nameFile;
+        if (replaceInExisting) {
+            setFile(new File(fileSave));
+            if (getFile().exists() && getFile().isDirectory()) {
+                setFile(notCopyName(getFile().getAbsolutePath()));
+            }
+        } else {
+            setFile(notCopyName(fileSave));
+        }
+
+
+    }
+
     //..............................................................................................................
 
-    public String getUSER_AGENT() {
+    private String getUserAgent() {
         return USER_AGENT;
     }
 
-    public String getPROPERTY() {
+    private String getProperty() {
         return PROPERTY;
     }
 
-    public String getDEFAULT_NAME_FILE() {
-        final String DEFAULT_NAME_FILE = "file";
-        return DEFAULT_NAME_FILE;
+    private String getDefaultNameFile() {
+        return "file";
     }
 
 
@@ -126,7 +128,7 @@ public class Downloader extends File_default implements IDownloader {
      * @param file name file. Possibly null
      * @return format file if not found return "" . firs symbol a 'SEPARATOR_FORMAT_FILE' then String format
      */
-    public String getFormat(String file) {
+    private String getFormat(String file) {
         int separator;
         if (file == null || (separator = file.lastIndexOf(SEPARATOR_FORMAT_FILE)) < 0) {
             return "";
@@ -138,15 +140,15 @@ public class Downloader extends File_default implements IDownloader {
     }
 
 
-    public String getNameFile(String name) {
+    private String getNameFile(String name) {
 
         if (name == null || name.isEmpty()) {
-            return getDEFAULT_NAME_FILE();
+            return getDefaultNameFile();
         }
         int last = name.lastIndexOf(SEPARATOR_FORMAT_FILE);
-        name = name.substring(0, (last < 1) ? name.length() - 1 : last);
+        name = name.substring(0, (last < 1) ? name.length() : last);
 
-        return (name.matches("[^|\\\\/?*:<>\"]+") ? name : getDEFAULT_NAME_FILE());
+        return (name.matches("[^|\\\\/?*:<>\"]+") ? name : getDefaultNameFile());
     }
 
 
